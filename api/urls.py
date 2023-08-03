@@ -1,13 +1,20 @@
 from django.urls import path, include
+from rest_framework.routers import SimpleRouter
 
-from .views import ProductListCreateView, ProductDetailView
+from .views import UserViewSet, ProductViewSet
 
-urlpatterns = [
-    path("products/", ProductListCreateView.as_view(), name="product_list"),
-    path("products/<int:pk>/", ProductDetailView.as_view(), name="product_detail"),
-    path("auth/", include("rest_framework.urls")),
-    path("dj-rest-auth/", include("dj_rest_auth.urls")),
-    path(
-        "dj-rest-auth/registration/", include("dj_rest_auth.registration.urls")  # new
-    ),
-]
+# url объединили в один. Теперь вместо 4х здесь 2 маршрута
+router = SimpleRouter()
+router.register("users", UserViewSet, basename="users")
+router.register("", ProductViewSet, basename="products")
+
+urlpatterns = router.urls
+
+# from .views import ProductListCreateView, ProductDetailView
+
+
+# urlpatterns = [
+#     path("products/", ProductListCreateView.as_view(), name="product_list"),
+#     path("products/<int:pk>/", ProductDetailView.as_view(), name="product_detail"),
+
+# ]
