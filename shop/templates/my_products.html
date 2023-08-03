@@ -1,0 +1,29 @@
+{% extends '_base.html' %}
+
+{% block title %}Dashboard{% endblock title %}
+
+{% block content %}
+<div class="mt-6 px-6 py-12 bg-gray-100 rounded-xl">
+    <h2 class="mb-12 text-2xl text-center">Мои продукты</h2>
+
+    <div class="grid grid-cols-3 gap-3">
+        {% for product in products %}
+        {% if product.image %}
+        <div>
+            <a href="{% url 'detail' product.pk product.slug %}">
+                <div>
+                    <img src="{{ product.image.url }}" class="rounded-t-xl" alt="img">
+                </div>
+
+                <div class="p-6 bg-white rounded-b-xl">
+                    <h2 class="text-2xl">{{ product.name }}</h2>
+                    <p class="text-gray-500">Price:{{ product.price }}</p>
+                    <p class="text-gray-500">{{ product.subcategory }}</p>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock content %}
