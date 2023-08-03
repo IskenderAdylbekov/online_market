@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 
-from .models import Category, Product, Subcategory
+from .models import Category, Product, Subcategory, Conversation, ConversationMessage
 
 
 @admin.register(Category)
@@ -26,5 +26,17 @@ class SubCategoryAdmin(admin.ModelAdmin):
     search_fields = ["name"]
 
 
-# admin.site.register(Category)
-# admin.site.register(Product)
+@admin.register(Conversation)
+class ConversationAdmin(admin.ModelAdmin):
+    list_display = ["product", "slug", "created_at"]
+    list_display_links = ["product", "created_at"]
+    list_filter = ["modified_at", "members"]
+    prepopulated_fields = {"slug": ("product",)}
+
+
+@admin.register(ConversationMessage)
+class ConversationMessageAdmin(admin.ModelAdmin):
+    list_display = ["conversation", "slug", "created_by", "created_at"]
+    list_display_links = ["conversation", "slug", "created_by"]
+    list_filter = ["conversation", "created_by"]
+    prepopulated_fields = {"slug": ("conversation",)}

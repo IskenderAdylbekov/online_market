@@ -178,3 +178,6 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "A sample blog to learn about DRF",
     "VERSION": "1.0.0",
 }
+
+
+AUTH_USER_MODEL = "accounts.CustomUser"

@@ -78,3 +78,38 @@ class Subcategory(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+
+class Conversation(models.Model):
+    product = models.ForeignKey(
+        Product, related_name="conversations", on_delete=models.CASCADE
+    )
+    slug = models.SlugField(max_length=200, blank=True, null=True)
+    members = models.ManyToManyField(CustomUser, related_name="conversations")
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-modified_at"]
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.product.slug)
+        super().save(*args, **kwargs)
+
+
+class ConversationMessage(models.Model):
+    conversation = models.ForeignKey(
+        Conversation, related_name="messages", on_delete=models.CASCADE
+    )
+    slug = models.SlugField(max_length=200, blank=True, null=True)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        CustomUser, related_name="created_messages", on_delete=models.CASCADE
+    )
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.conversation.product.slug)
+        super().save(*args, **kwargs)

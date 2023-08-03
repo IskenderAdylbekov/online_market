@@ -4,8 +4,8 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 
 
-from .models import Product, Category, Subcategory
-from .forms import NewProductForm, EditProductForm
+from .models import Product, Category, Conversation, ConversationMessage
+from .forms import NewProductForm, EditProductForm, ConversationMessageForm
 
 
 User = get_user_model()
@@ -102,4 +102,77 @@ def search_products(request):
             "categories": categories,
             "category_id": int(category_id),
         },
+    )
+
+
+@login_required
+def new_conversation(request, product_pk, slug):
+    product = get_object_or_404(Product, pk=product_pk, slug=slug)
+    if product.created_by == request.user:
+        return redirect("dashboard")
+
+    conversations = Conversation.objects.filter(product=product).filter(
+        members__in=[request.user.id]
+    )
+
+    if conversations:
+        pass
+
+    if request.method == "POST":
+        form = ConversationMessageForm(request.POST)
+
+        if form.is_valid():
+            conversation = Conversation.objects.create(product=product)
+            conversation.members.add(request.user)
+            conversation.members.add(product.created_by)
+            conversation.save()
+
+            conversation_message = form.save(commit=False)
+            conversation_message.conversation = conversation
+            conversation_message.created_by = request.user
+            conversation_message.save()
+
+            return redirect("detail", pk=product_pk, slug=slug)
+    else:
+        form = ConversationMessageForm()
+
+    return render(
+        request,
+        "conversation.html",
+        {"form": form},
+    )
+
+
+@login_required
+def inbox(request):
+    conversations = Conversation.objects.filter(members__in=[request.user.id])
+
+    return render(request, "inbox.html", {"conversations": conversations})
+
+
+@login_required
+def detail_conf(request, pk, slug):
+    conversation = Conversation.objects.filter(members__in=[request.user.id]).get(
+        pk=pk, slug=slug
+    )
+
+    if request.method == "POST":
+        form = ConversationMessageForm(request.POST)
+
+        if form.is_valid():
+            conversation_message = form.save(commit=False)
+            conversation_message.conversation = conversation
+            conversation_message.created_by = request.user
+            conversation_message.save()
+
+            conversation.save()
+
+            return redirect("messages", pk=pk, slug=slug)
+    else:
+        form = ConversationMessageForm()
+
+    return render(
+        request,
+        "detail_conf.html",
+        {"conversation": conversation, "form": form},
     )
